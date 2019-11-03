@@ -61,7 +61,7 @@ public class View {
         Scanner scanner = new Scanner(System.in);
         int dec;
         
-        System.out.println("Which decymal number do you want to convert?");
+        System.out.println("Which decimal number do you want to convert?");
         dec = Integer.valueOf(scanner.next());
         
         return dec;
