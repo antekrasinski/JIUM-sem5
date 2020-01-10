@@ -1,5 +1,5 @@
 
-package bin2dec2binconverter.Model;
+package bin2dec2binconverter.model;
 
 /**
  * Class with bin2dec conversion logic
@@ -45,6 +45,7 @@ public class Bin2DecConverterModel {
      */
     public void convertBin2Dec(String bin)
     {
+        dec = 0;
         int counter = 0;
         for(int i = (bin.length()-1); i >= 0; i--)
         {

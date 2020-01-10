@@ -1,4 +1,4 @@
 bin2dec2binconverter
-bin2dec2binconverter.Controller
-bin2dec2binconverter.Model
-bin2dec2binconverter.View
+bin2dec2binconverter.controller
+bin2dec2binconverter.model
+bin2dec2binconverter.view

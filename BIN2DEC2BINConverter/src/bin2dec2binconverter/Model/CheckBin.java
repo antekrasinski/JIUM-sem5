@@ -1,5 +1,5 @@
 
-package bin2dec2binconverter.Model;
+package bin2dec2binconverter.model;
 /**
  * Class checking if the binary number is correct 
  * @author Antoni Krasiński

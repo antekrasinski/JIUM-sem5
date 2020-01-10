@@ -1,9 +1,9 @@
 
 package bin2dec2binconverter;
-import bin2dec2binconverter.Controller.Controller;
-import bin2dec2binconverter.Model.Bin2DecConverterModel;
-import bin2dec2binconverter.Model.Dec2BinConverterModel;
-import bin2dec2binconverter.View.View;
+import bin2dec2binconverter.controller.Controller;
+import bin2dec2binconverter.model.Bin2DecConverterModel;
+import bin2dec2binconverter.model.Dec2BinConverterModel;
+import bin2dec2binconverter.view.View;
 /**
  * Class with main method
  * @author Antoni Krasińśki

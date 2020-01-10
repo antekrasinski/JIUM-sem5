@@ -1,5 +1,5 @@
 
-package bin2dec2binconverter.Model;
+package bin2dec2binconverter.model;
 
 /**
  * Exception class defining the exception of incorrect binary number
@@ -16,4 +16,5 @@ public class NotBinaryNumberException extends Exception
     {
         super(bin + " is not a binary number.");
     }
+    
 }
