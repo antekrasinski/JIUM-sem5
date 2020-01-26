@@ -9,9 +9,11 @@ import bin2dec2binClient.Bin2dec2binClient;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Scanner;
+
 /**
- *
- * @author Antek
+ * Controller and view class for Client console.
+ * @author Antoni Krasinski
+ * @version 1.0
  */
 public class Converter{
     private static Bin2dec2binClient client;
@@ -45,6 +47,9 @@ public class Converter{
             }
         }
     
+    /**
+     * Method showing the menu options.
+     */
     private static void showMenu()
     {
         System.out.println("-----------------");
@@ -56,19 +61,28 @@ public class Converter{
         System.out.println("-----------------");
     }
     
+    /**
+     * Setter for menu option.
+     */
     private void setOption()
     {
         Scanner scanner = new Scanner(System.in);
         option = Integer.parseInt(scanner.next());
     }
     
+    /**
+     * Setter for binary value.
+     */
     private void setBin()
     {
         System.out.println("Podaj BIN: ");
         Scanner scanner = new Scanner(System.in);
         bin = scanner.next();
     }
-     
+    
+     /**
+      * Setter for decimal value.
+      */
     private void setDec()
     {
         System.out.println("Podaj DEC: ");
@@ -76,6 +90,9 @@ public class Converter{
         dec = Integer.parseInt(scanner.next());
     }
     
+    /**
+     * Setter for list of binary values.
+     */
     private void setMultipleBin()
     {
         System.out.println("Podaj trzy BIN: ");

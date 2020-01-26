@@ -1,8 +1,3 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
 package bin2dec2binconverter.server;
 
 import java.io.Closeable;
@@ -12,18 +7,36 @@ import java.net.ServerSocket;
 import java.util.Properties;
 
 /**
- *
- * @author Antek
+ * Class responsible for starting the connection.
+ * @author Antoni Krasinski
+ * @version 1.0
  */
 public class Server implements Closeable{
+    
+    /**
+     * Port number.
+     */
     private int port;
+    
+    /**
+     * Socket necessary for connection between server and client.
+     */
     private final ServerSocket socket;
     
+    /**
+     * Constructor setting the socket.
+     * @throws IOException - thrown by socket
+     */
     public Server() throws IOException
     {
         socket = new ServerSocket(port);
     }
     
+    /**
+     * Constructor using properties file to make the connection.
+     * @param propertiesFile - name of a file containing port number
+     * @throws IOException - thrown when there will be problems with initialization.
+     */
     public Server(String propertiesFile) throws IOException
     {
         Properties properties = new Properties();
@@ -38,6 +51,10 @@ public class Server implements Closeable{
         }
     }
     
+    /**
+     * Method closing the connection on server site.
+     * @throws IOException - thrown by socket
+     */
     @Override
     public void close() throws IOException
     {

@@ -1,8 +1,3 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
 package bin2dec2binconverter.server;
 
 import bin2dec2binconverter.model.Bin2DecConverterModel;
@@ -20,21 +15,36 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- *
- * @author Antek
+ * Class providing connection between server and client.
+ * @author Antoni Krasinski
+ * @version 1.0
  */
 public class ServerConnection extends Thread{
     
+    /**
+     * Socket necessary for connection between server and client.
+     */
     private final Socket socket;
     
+    /**
+     * Buffered reader for receiving messages from client.
+     */
     private final BufferedReader reader;
     
+    /**
+     * Print writer for sending messages to client.
+     */
     private final PrintWriter writer;
     
     private Dec2BinConverterModel dec2BinModel;
 
     private Bin2DecConverterModel bin2DecModel;
     
+    /**
+     * Constructor of ServerConnection setting PrintWriter and BufferedReader with a socket received in parameter.
+     * @param socket - necessary for the connection
+     * @throws IOException - thrown by socket
+     */
     public ServerConnection(Socket socket) throws IOException
     {
         this.socket = socket;
@@ -42,6 +52,9 @@ public class ServerConnection extends Thread{
         reader = new BufferedReader(new InputStreamReader(socket.getInputStream()));
     }
     
+    /**
+     * Method invoking functions chosen by user.
+     */
     @Override
     public final void run()
     {
@@ -82,6 +95,9 @@ public class ServerConnection extends Thread{
         }
     }
     
+    /**
+     * Method for communicating with Client through bin2Dec conversion.
+     */
     private void bin2Dec()
     {
         boolean error = false;
@@ -112,6 +128,9 @@ public class ServerConnection extends Thread{
         }
     }
     
+    /**
+     * Method for communicating with Client through dec2Bin conversion.
+     */
     private void dec2Bin()
     {
         try
@@ -131,6 +150,9 @@ public class ServerConnection extends Thread{
         }
     }
     
+    /**
+     * Method for communicating with Client through multipleBin2Dec conversion.
+     */
    private void multipleBin2Dec()
     {
         boolean error = false;
@@ -183,12 +205,19 @@ public class ServerConnection extends Thread{
         }
     }
     
+   /**
+    * Method showing list of avaliable commands. 
+    */
    public void serverHelp() 
     {
         writer.println("HELP");
         writer.println("BIN2DEC DEC2BIN MULTIPLEBIN2DEC HELP");
     }
    
+   /**
+    * Method closing the socket.
+    * @throws IOException - thrown by socket
+    */
     public void close() throws IOException
     {
         if(socket !=null)

@@ -1,21 +1,22 @@
-package bin2dec2binconverter;
 
-import bin2dec2binView.Converter;
+package bin2dec2binconverter;
+import bin2dec2binconverter.server.Server;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.Properties;
-
 /**
- * Class containing the main method
- * @author Antoni Krasinski
+ * Class with main method
+ * @author Antoni Krasiński
  * @version 1.0
  */
 public class BIN2DEC2BINConverter {
+
     /**
-     * Main method.
-     * @param args - arguments from command line
+     * Main method
+     * @param args the command line arguments
+     * args[0] - option in a main menu (1 - bin2dec conversion 2 - dec2bin conversion)
      */
-    public static void main(String[] args)
+    public static void main(String[] args) 
     {
         Properties properties = new Properties();
         properties.setProperty("port", "8888");
@@ -26,7 +27,11 @@ public class BIN2DEC2BINConverter {
         } catch (IOException e) {
             System.err.println(e.getMessage());
         }
-        Converter converter = new Converter();
-        converter.run();
+        try (Server server = new Server(".properties")){
+        }
+        catch (IOException e) {
+            System.err.println(e.getMessage());
+        }
     }
+    
 }

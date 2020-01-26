@@ -10,21 +10,41 @@ import java.util.List;
 import java.util.Properties;
 
 /**
- *
- * @author Antek
+ * Class responsible for communication with server.
+ * @author Antoni Krasinski
+ * @version 1.0
  */
 public class Bin2dec2binClient {
 
+    /**
+     * Port number.
+     */
     private int port;
     
+    /**
+     * Server address.
+     */
     private String serverAddress;
     
+    /**
+     * Socket necessary for connection between server and client.
+     */
     private Socket socket;
     
+    /**
+     * Buffered reader for receiving messages from server.
+     */
     private BufferedReader reader;
     
+    /**
+     * Print writer for sending messages to server.
+     */
     private PrintWriter writer;
     
+    /**
+     * Constructor of client class.
+     * @param propertiesFile - name of file containing properties
+     */
     public Bin2dec2binClient (String propertiesFile) 
     {
         try{
@@ -43,6 +63,11 @@ public class Bin2dec2binClient {
         }
     }
  
+    /**
+     * Method sending messages containing chosen option from menu and binary number to be converted.
+     * @param bin - binary value to be converted
+     * @return - message from the server
+     */
     public String bin2dec(String bin)
     {
         try{
@@ -72,6 +97,11 @@ public class Bin2dec2binClient {
         }
     }
     
+    /**
+     * Method sending messages containing chosen option from menu and decimal number to be converted.
+     * @param dec - decimal value to be converted
+     * @return - message from the server
+     */
     public String dec2bin(Integer dec)
     {
         try{
@@ -101,6 +131,11 @@ public class Bin2dec2binClient {
         }
     }
     
+    /**
+     * Method sending messages containing chosen option from menu and list of binary numbers to be converted.
+     * @param multipleBin - list of binary values to be converted
+     * @return - message from the server
+     */
     public String multipleBin2Dec(List<String> multipleBin)
     {
         try{
@@ -140,6 +175,10 @@ public class Bin2dec2binClient {
         }
     }
     
+    /**
+    * Method closing the socket.
+    * @throws IOException - thrown by socket
+    */
     public void close() throws IOException
     {
         if(socket!=null)
