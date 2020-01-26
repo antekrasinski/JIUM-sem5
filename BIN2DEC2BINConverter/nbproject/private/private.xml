@@ -3,16 +3,9 @@
     <editor-bookmarks xmlns="http://www.netbeans.org/ns/editor-bookmarks/2" lastBookmarkId="0"/>
     <open-files xmlns="http://www.netbeans.org/ns/projectui-open-files/2">
         <group>
-            <file>file:/C:/Users/antek/Documents/Studia/JiUM/BIN2DEC2BINConverter/src/bin2dec2binconverter/model/Bin2DecConverterModel.java</file>
-            <file>file:/C:/Users/antek/Documents/Studia/JiUM/BIN2DEC2BINConverter/src/bin2dec2binconverter/model/CheckBin.java</file>
-            <file>file:/C:/Users/antek/Documents/Studia/JiUM/BIN2DEC2BINConverter/src/bin2dec2binconverter/controller/Controller.java</file>
-            <file>file:/C:/Users/antek/Documents/Studia/JiUM/BIN2DEC2BINConverter/src/bin2dec2binconverter/view/View.java</file>
-            <file>file:/C:/Users/antek/Documents/Studia/JiUM/BIN2DEC2BINConverter/src/bin2dec2binconverter/model/MenuEnum.java</file>
-            <file>file:/C:/Users/antek/Documents/Studia/JiUM/BIN2DEC2BINConverter/test/bin2dec2binconverter/model/CheckBinTests.java</file>
-            <file>file:/C:/Users/antek/Documents/Studia/JiUM/BIN2DEC2BINConverter/test/bin2dec2binconverter/model/Dec2BinTests.java</file>
-            <file>file:/C:/Users/antek/Documents/Studia/JiUM/BIN2DEC2BINConverter/src/bin2dec2binconverter/model/NotBinaryNumberException.java</file>
-            <file>file:/C:/Users/antek/Documents/Studia/JiUM/BIN2DEC2BINConverter/src/bin2dec2binconverter/model/Dec2BinConverterModel.java</file>
-            <file>file:/C:/Users/antek/Documents/Studia/JiUM/BIN2DEC2BINConverter/test/bin2dec2binconverter/model/Bin2DecTests.java</file>
+            <file>file:/C:/Users/antek/Documents/Studia/JiUM/JIUM-sem5/BIN2DEC2BINConverter/src/bin2dec2binconverter/server/Server.java</file>
+            <file>file:/C:/Users/antek/Documents/Studia/JiUM/JIUM-sem5/BIN2DEC2BINConverter/src/bin2dec2binconverter/server/ServerConnection.java</file>
+            <file>file:/C:/Users/antek/Documents/Studia/JiUM/JIUM-sem5/BIN2DEC2BINConverter/src/bin2dec2binconverter/BIN2DEC2BINConverter.java</file>
         </group>
     </open-files>
 </project-private>

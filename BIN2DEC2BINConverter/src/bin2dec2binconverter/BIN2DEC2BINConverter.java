@@ -1,9 +1,9 @@
 
 package bin2dec2binconverter;
-import bin2dec2binconverter.controller.Controller;
-import bin2dec2binconverter.model.Bin2DecConverterModel;
-import bin2dec2binconverter.model.Dec2BinConverterModel;
-import bin2dec2binconverter.view.View;
+import bin2dec2binconverter.server.Server;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.util.Properties;
 /**
  * Class with main method
  * @author Antoni Krasińśki
@@ -14,15 +14,24 @@ public class BIN2DEC2BINConverter {
     /**
      * Main method
      * @param args the command line arguments
-     * args[0] - option in a main menu (1 - bin2dec convertion 2 - dec2bin converion)
+     * args[0] - option in a main menu (1 - bin2dec conversion 2 - dec2bin conversion)
      */
     public static void main(String[] args) 
     {
-        Bin2DecConverterModel bin2DecModel = new Bin2DecConverterModel();
-        Dec2BinConverterModel dec2BinModel = new Dec2BinConverterModel();
-        View consoleView = new View();
-        Controller controller = new Controller (consoleView, bin2DecModel, dec2BinModel);
-        controller.runProgram(args);
+        Properties properties = new Properties();
+        properties.setProperty("port", "8888");
+        properties.setProperty("server_adress", "192.168.1.20"); 
+        
+        try (FileOutputStream out = new FileOutputStream(".properties")) {
+            properties.store(out, "--Konfiguracja--");
+        } catch (IOException e) {
+            System.err.println(e.getMessage());
+        }
+        try (Server server = new Server(".properties")){
+        }
+        catch (IOException e) {
+            System.err.println(e.getMessage());
+        }
     }
     
 }
