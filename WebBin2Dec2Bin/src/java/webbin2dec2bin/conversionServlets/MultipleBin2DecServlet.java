@@ -2,6 +2,11 @@ package webbin2dec2bin.conversionServlets;
 
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.List;
 import javax.servlet.ServletException;
@@ -13,7 +18,6 @@ import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 import webbin2dec2bin.model.Bin2DecConverterModel;
 import webbin2dec2bin.model.CheckBin;
-import webbin2dec2bin.model.History;
 import webbin2dec2bin.model.NotBinaryNumberException;
 
 /**
@@ -25,6 +29,11 @@ import webbin2dec2bin.model.NotBinaryNumberException;
 @WebServlet (urlPatterns = {"/MULTIPLEBIN2DEC"})
 public class MultipleBin2DecServlet extends HttpServlet {
 
+    /**
+     * Containing information about connection with database.
+     */
+    private Connection connection;
+    
     /**
      * Handles the HTTP GET method.
      *
@@ -73,6 +82,30 @@ public class MultipleBin2DecServlet extends HttpServlet {
         binList.add(second);
         binList.add(third);
 
+        if ((Connection) this.getServletContext().getAttribute("databaseConnection") == null) {
+                try {
+                    Class.forName("org.apache.derby.jdbc.ClientDriver");
+                } catch (ClassNotFoundException e) {
+                    System.err.println("Can't connect to database");
+                }
+
+                try {
+                    String url = this.getServletContext().getInitParameter("url");
+                    String username = this.getServletContext().getInitParameter("username");
+                    String password = this.getServletContext().getInitParameter("password");
+
+                    connection = DriverManager.getConnection(url, username, password);
+                } catch (SQLException sqle) {
+                    connection = null;
+                    System.err.println("Can't connect to database!");
+                }
+
+                this.getServletContext().setAttribute("databaseConnection", connection);
+            } else {
+                connection = (Connection) this.getServletContext().getAttribute("databaseConnection");
+            }
+
+        
         for (String element : binList) {
             try {
                 check.checkBinaryNumber(element);
@@ -97,21 +130,25 @@ public class MultipleBin2DecServlet extends HttpServlet {
                 model.convertBin2Dec(element);
                 result += "Bin: " + element;
                 result += " Dec: " + (Integer.toString(model.getDec()) + "<br>");
+                
+                try {
+                Statement statement = connection.createStatement();
+                ResultSet rs = statement.executeQuery("SELECT * FROM WebConversions");
+
+                if (!rs.next()) {
+                    Cookie cookie = new Cookie("firstConversion", result);
+                    response.addCookie(cookie);
+                }
+
+                statement.executeUpdate("INSERT INTO WebConversions (binary_value, decimal_value) VALUES('"
+                        + element + "', '" + Integer.toString(model.getDec()) + "')");
+            } catch (SQLException e) {
+                response.sendError(HttpServletResponse.SC_BAD_REQUEST, e.getMessage());
+            }
                 model.setDec(0);
             }
         }
         if (!error) {
-            Object object = session.getAttribute("history");
-            History history;
-            if (object == null) {
-                history = new History();
-                session.setAttribute("history", history);
-                Cookie cookie = new Cookie("firstConversion", result);
-                response.addCookie(cookie);
-            } else {
-                history = (History) object;
-            }
-            history.addToHistory(result);
             try (PrintWriter out = response.getWriter()) {
                 out.println("<!DOCTYPE html>");
                 out.println("<html>");

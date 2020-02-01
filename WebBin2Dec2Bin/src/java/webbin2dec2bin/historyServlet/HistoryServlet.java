@@ -1,27 +1,34 @@
 package webbin2dec2bin.historyServlet;
 
-import webbin2dec2bin.model.History;
+
 import java.io.IOException;
 import java.io.PrintWriter;
-import java.util.List;
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Statement;
 import javax.servlet.ServletException;
 import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import javax.servlet.http.HttpSession;
 
 /**
- * Class responsible for showing history of conversions.
- * 
+ * Class responsible for showing history of conversions using database.
+ *
  * @author Antoni Krasinski
  * @version 1.0
  */
-@WebServlet (urlPatterns = {"/HISTORY"})
+@WebServlet(urlPatterns = {"/HISTORY"})
 public class HistoryServlet extends HttpServlet {
-    
-    
+
+    /**
+     * Containing information about connection with database.
+     */
+    private Connection connection;
+
     /**
      * Handles the HTTP GET method.
      *
@@ -32,57 +39,82 @@ public class HistoryServlet extends HttpServlet {
      */
     @Override
     public void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-      
+
         response.setContentType("text/html;charset=UTF-8");
-        HttpSession session = request.getSession(true);
+        
+        if ((Connection) this.getServletContext().getAttribute("databaseConnection") == null) {
+            try {
+                Class.forName("org.apache.derby.jdbc.ClientDriver");
+            } catch (ClassNotFoundException e) {
+                System.err.println("Can't connect to database");
+            }
+            
+            /**
+            * try (Connection con = DriverManager.getConnection("jdbc:derby://localhost:1527/Conversions", "Krasinski", "Krasinski")) {
+                Statement statement = con.createStatement();
+                statement.executeUpdate("CREATE TABLE WebConversions "
+                + "(id INTEGER NOT NULL GENERATED ALWAYS AS IDENTITY (START WITH 1, INCREMENT BY 1), binary_value VARCHAR(50), decimal_value VARCHAR(50), PRIMARY KEY (id)) ");
+             
+            System.out.println("Table created");
+            } catch (SQLException sqle) {
+                System.err.println(sqle.getMessage());
+            }
+            */
+            
+            try {
+                String url = this.getServletContext().getInitParameter("url");
+                String username = this.getServletContext().getInitParameter("username");
+                String password = this.getServletContext().getInitParameter("password");
 
-        Object object = session.getAttribute("history");
-        History history;
+                connection = DriverManager.getConnection(url, username, password);
+            } catch (SQLException sqle) {
+                connection = null;
+                System.err.println("Can't connect to database!");
+            }
 
-        if (object == null) {
-            history = new History();
-            session.setAttribute("history", history);
+            this.getServletContext().setAttribute("databaseConnection", connection);
         } else {
-            history = (History) object;
+            connection = (Connection) this.getServletContext().getAttribute("databaseConnection");
         }
-
-        List<String> listOfConversions = history.getHistory();
 
         try (PrintWriter out = response.getWriter()) {
-            if (listOfConversions.isEmpty()) {
-                out.println("<!DOCTYPE html>");
-                out.println("<html>");
-                out.println("<body>");
-                out.println("<h1>History of conversions is empty</h1>");
-                out.println("</body>");
-                out.println("</html>");
-            } else {
-                out.println("<!DOCTYPE html>");
-                out.println("<html>");
-                out.println("<body>");
-                
-                Cookie[] cookies = request.getCookies();
-                String firstConversion = "";
 
-                for (Cookie cookie : cookies) {
-                    if (cookie.getName().equals("firstConversion")) {
-                        firstConversion = cookie.getValue();
-                    }
-                }
+            out.println("<!DOCTYPE html>");
+            out.println("<html>");
+            out.println("<body>");
 
-                if (!firstConversion.equals("")) {
-                    out.println("<h1>First conversion: " + firstConversion + "<h1>");
-                }
+            Cookie[] cookies = request.getCookies();
+            String firstConversion = "";
 
-                for (int i = 0; i < listOfConversions.size(); i++) {
-                    out.println("<h1>" + listOfConversions.get(i) + "</h1>");
+            for (Cookie cookie : cookies) {
+                if (cookie.getName().equals("firstConversion")) {
+                    firstConversion = cookie.getValue();
                 }
-                out.println("</body>");
-                out.println("</html>");
             }
+
+            if (!firstConversion.equals("")) {
+                out.println("<h1>First conversion: " + firstConversion + "<h1>");
+            }
+
+            try {
+                Statement statement = connection.createStatement();
+                ResultSet rs = statement.executeQuery("SELECT * FROM WebConversions");
+                if(!rs.next())
+                    out.println("History of conversions is empty.");
+                while (rs.next()) {
+                    out.println(rs.getString(1) + ") BIN: " + rs.getString(2) + " DEC: " + rs.getString(3) + "<br>");
+                }
+            } catch (SQLException e) {
+                response.sendError(HttpServletResponse.SC_BAD_REQUEST, e.getMessage());
+            }
+
+            out.println("</body>");
+            out.println("</html>");
+
         }
+
     }
-    
+
     /**
      * Handles the HTTP POST method.
      *
@@ -93,9 +125,9 @@ public class HistoryServlet extends HttpServlet {
      */
     @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-      doGet(request, response);
+        doGet(request, response);
     }
-    
+
     /**
      * Returns a short description of the servlet.
      *

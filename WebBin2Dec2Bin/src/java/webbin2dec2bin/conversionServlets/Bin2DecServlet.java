@@ -2,6 +2,11 @@ package webbin2dec2bin.conversionServlets;
 
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Statement;
 import javax.servlet.ServletException;
 import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.Cookie;
@@ -11,7 +16,6 @@ import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 import webbin2dec2bin.model.Bin2DecConverterModel;
 import webbin2dec2bin.model.CheckBin;
-import webbin2dec2bin.model.History;
 import webbin2dec2bin.model.NotBinaryNumberException;
 
 /**
@@ -24,6 +28,11 @@ import webbin2dec2bin.model.NotBinaryNumberException;
 public class Bin2DecServlet extends HttpServlet {
 
     /**
+     * Containing information about connection with database.
+     */
+    private Connection connection;
+
+    /**
      * Handles the HTTP GET method.
      *
      * @param request servlet request
@@ -34,7 +43,7 @@ public class Bin2DecServlet extends HttpServlet {
     @Override
     public void doGet(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
-       
+
         response.setContentType("text/html;charset=UTF-8");
 
         String bin = request.getParameter("bin");
@@ -80,26 +89,50 @@ public class Bin2DecServlet extends HttpServlet {
                 out.println("</html>");
             }
         }
-       
+
         if (!error) {
             model.convertBin2Dec(bin);
-            String result = "Bin: " + bin + " Dec: " + Integer.toString(model.getDec());
-           
-            Object hObj = session.getAttribute("history");
-            History history;
-           
-            if (hObj == null) {
-                
-                history = new History();
-                session.setAttribute("history", history);
-                
-                Cookie cookie = new Cookie("firstConversion", result);
-                response.addCookie(cookie);
+            String dec = Integer.toString(model.getDec());
+            String result = "Bin: " + bin + " Dec: " + dec;
+
+            if ((Connection) this.getServletContext().getAttribute("databaseConnection") == null) {
+                try {
+                    Class.forName("org.apache.derby.jdbc.ClientDriver");
+                } catch (ClassNotFoundException e) {
+                    System.err.println("Can't connect to database");
+                }
+
+                try {
+                    String url = this.getServletContext().getInitParameter("url");
+                    String username = this.getServletContext().getInitParameter("username");
+                    String password = this.getServletContext().getInitParameter("password");
+
+                    connection = DriverManager.getConnection(url, username, password);
+                } catch (SQLException sqle) {
+                    connection = null;
+                    System.err.println("Can't connect to database!");
+                }
+
+                this.getServletContext().setAttribute("databaseConnection", connection);
             } else {
-                history = (History) hObj;
+                connection = (Connection) this.getServletContext().getAttribute("databaseConnection");
             }
-            history.addToHistory(result);
-            
+
+            try {
+                Statement statement = connection.createStatement();
+                ResultSet rs = statement.executeQuery("SELECT * FROM WebConversions");
+
+                if (!rs.next()) {
+                    Cookie cookie = new Cookie("firstConversion", result);
+                    response.addCookie(cookie);
+                }
+
+                statement.executeUpdate("INSERT INTO WebConversions (binary_value, decimal_value) VALUES('"
+                        + bin + "', '" + dec + "')");
+            } catch (SQLException e) {
+                response.sendError(HttpServletResponse.SC_BAD_REQUEST, e.getMessage());
+            }
+
             try (PrintWriter out = response.getWriter()) {
 
                 out.println("<!DOCTYPE html>");
