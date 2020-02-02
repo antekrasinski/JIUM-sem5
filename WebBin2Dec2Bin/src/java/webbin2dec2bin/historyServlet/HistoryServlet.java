@@ -1,19 +1,16 @@
 package webbin2dec2bin.historyServlet;
 
-
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.sql.Connection;
-import java.sql.DriverManager;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.sql.Statement;
 import javax.servlet.ServletException;
 import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import javax.xml.ws.WebServiceRef;
+import servicesbin2dec2bin.dbconnection.HistorySer_Service;
 
 /**
  * Class responsible for showing history of conversions using database.
@@ -23,6 +20,9 @@ import javax.servlet.http.HttpServletResponse;
  */
 @WebServlet(urlPatterns = {"/HISTORY"})
 public class HistoryServlet extends HttpServlet {
+
+    @WebServiceRef(wsdlLocation = "WEB-INF/wsdl/localhost_8080/HistorySer/HistorySer.wsdl")
+    private HistorySer_Service service;
 
     /**
      * Containing information about connection with database.
@@ -41,42 +41,26 @@ public class HistoryServlet extends HttpServlet {
     public void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
 
         response.setContentType("text/html;charset=UTF-8");
-        
-        if ((Connection) this.getServletContext().getAttribute("databaseConnection") == null) {
-            try {
-                Class.forName("org.apache.derby.jdbc.ClientDriver");
-            } catch (ClassNotFoundException e) {
-                System.err.println("Can't connect to database");
+        boolean error = false;
+        String history = "";
+        try{
+        history = getHistory();
+        } catch (Exception e)
+        {
+            error = true;
+            try (PrintWriter out = response.getWriter()) {
+                out.println("<!DOCTYPE html>");
+                out.println("<html>");
+                out.println("<head>");
+                out.println("<title>Servlet ConversionServlet</title>");
+                out.println("</head>");
+                out.println("<body>");
+                out.println("Exception: " + e);
+                out.println("</body>");
+                out.println("</html>");
             }
-            
-            /**
-            * try (Connection con = DriverManager.getConnection("jdbc:derby://localhost:1527/Conversions", "Krasinski", "Krasinski")) {
-                Statement statement = con.createStatement();
-                statement.executeUpdate("CREATE TABLE WebConversions "
-                + "(id INTEGER NOT NULL GENERATED ALWAYS AS IDENTITY (START WITH 1, INCREMENT BY 1), binary_value VARCHAR(50), decimal_value VARCHAR(50), PRIMARY KEY (id)) ");
-             
-            System.out.println("Table created");
-            } catch (SQLException sqle) {
-                System.err.println(sqle.getMessage());
-            }
-            */
-            
-            try {
-                String url = this.getServletContext().getInitParameter("url");
-                String username = this.getServletContext().getInitParameter("username");
-                String password = this.getServletContext().getInitParameter("password");
-
-                connection = DriverManager.getConnection(url, username, password);
-            } catch (SQLException sqle) {
-                connection = null;
-                System.err.println("Can't connect to database!");
-            }
-
-            this.getServletContext().setAttribute("databaseConnection", connection);
-        } else {
-            connection = (Connection) this.getServletContext().getAttribute("databaseConnection");
         }
-
+        if(!error){
         try (PrintWriter out = response.getWriter()) {
 
             out.println("<!DOCTYPE html>");
@@ -96,23 +80,12 @@ public class HistoryServlet extends HttpServlet {
                 out.println("<h1>First conversion: " + firstConversion + "<h1>");
             }
 
-            try {
-                Statement statement = connection.createStatement();
-                ResultSet rs = statement.executeQuery("SELECT * FROM WebConversions");
-                if(!rs.next())
-                    out.println("History of conversions is empty.");
-                while (rs.next()) {
-                    out.println(rs.getString(1) + ") BIN: " + rs.getString(2) + " DEC: " + rs.getString(3) + "<br>");
-                }
-            } catch (SQLException e) {
-                response.sendError(HttpServletResponse.SC_BAD_REQUEST, e.getMessage());
-            }
-
+            out.println(history);
             out.println("</body>");
             out.println("</html>");
 
         }
-
+        }
     }
 
     /**
@@ -136,5 +109,15 @@ public class HistoryServlet extends HttpServlet {
     @Override
     public String getServletInfo() {
         return "Servlet responsible for showing history.";
+    }
+
+    /**
+     * Method that gets history of conversions from History Service
+     * @return history of conversions 
+     */
+    private String getHistory() {
+        servicesbin2dec2bin.dbconnection.HistorySer_Service service = new servicesbin2dec2bin.dbconnection.HistorySer_Service();
+        servicesbin2dec2bin.dbconnection.HistorySer port = service.getHistorySerPort();
+        return port.getHistory();
     }
 }

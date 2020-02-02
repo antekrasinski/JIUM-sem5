@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<jax-ws xmlns="http://www.netbeans.org/ns/jax-ws/1">
+  <services>
+    <service name="Conversions">
+      <implementation-class>servicesbin2dec2bin.conversionsService.Conversions</implementation-class>
+    </service>
+    <service name="HistorySer">
+      <implementation-class>servicesbin2dec2bin.dbConnection.HistorySer</implementation-class>
+    </service>
+  </services>
+  <clients/>
+</jax-ws>

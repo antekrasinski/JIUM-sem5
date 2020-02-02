@@ -1,3 +1,4 @@
+servicesbin2dec2bin.conversionsservice
+servicesbin2dec2bin.dbconnection
 webbin2dec2bin.conversionServlets
 webbin2dec2bin.historyServlet
-webbin2dec2bin.model

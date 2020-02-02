@@ -2,21 +2,13 @@ package webbin2dec2bin.conversionServlets;
 
 import java.io.IOException;
 import java.io.PrintWriter;
-import java.sql.Connection;
-import java.sql.DriverManager;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.sql.Statement;
 import javax.servlet.ServletException;
 import javax.servlet.annotation.WebServlet;
-import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import javax.servlet.http.HttpSession;
-import webbin2dec2bin.model.Bin2DecConverterModel;
-import webbin2dec2bin.model.CheckBin;
-import webbin2dec2bin.model.NotBinaryNumberException;
+import javax.xml.ws.WebServiceRef;
+import servicesbin2dec2bin.conversionsservice.Conversions_Service;
 
 /**
  * Class responsible for bin2dec conversion, containing making sure if values are correct.
@@ -27,10 +19,8 @@ import webbin2dec2bin.model.NotBinaryNumberException;
 @WebServlet (urlPatterns = {"/BIN2DEC"})
 public class Bin2DecServlet extends HttpServlet {
 
-    /**
-     * Containing information about connection with database.
-     */
-    private Connection connection;
+    @WebServiceRef(wsdlLocation = "WEB-INF/wsdl/localhost_8080/Conversions/Conversions.wsdl")
+    private Conversions_Service service;
 
     /**
      * Handles the HTTP GET method.
@@ -47,92 +37,27 @@ public class Bin2DecServlet extends HttpServlet {
         response.setContentType("text/html;charset=UTF-8");
 
         String bin = request.getParameter("bin");
-        HttpSession session = request.getSession(true);
-
+        String dec = "";
         boolean error = false;
-
-        Bin2DecConverterModel model;
-        CheckBin check;
-
-        Object mObj = session.getAttribute("b2dmodel");
-        Object cObj = session.getAttribute("check");
-
-        if (mObj == null) {
-            model = new Bin2DecConverterModel();
-            session.setAttribute("b2dmodel", mObj);
-        } else {
-            model = (Bin2DecConverterModel) mObj;
-        }
-
-        if (cObj == null) {
-            check = new CheckBin();
-            session.setAttribute("check", cObj);
-        } else {
-            check = (CheckBin) cObj;
-        }
-
         try {
-            check.checkBinaryNumber(bin);
-        } catch (NotBinaryNumberException e) {
+            dec = bin2Dec(bin);
+        } catch (Exception e) {
             error = true;
             try (PrintWriter out = response.getWriter()) {
-
                 out.println("<!DOCTYPE html>");
                 out.println("<html>");
                 out.println("<head>");
                 out.println("<title>Servlet ConversionServlet</title>");
                 out.println("</head>");
                 out.println("<body>");
-                out.println("<h1>RESULT</h1>");
-                out.println("<h1>" + e.getMessage() + "</h1>");
+                out.println("Exception: " + e);
                 out.println("</body>");
                 out.println("</html>");
             }
         }
 
         if (!error) {
-            model.convertBin2Dec(bin);
-            String dec = Integer.toString(model.getDec());
-            String result = "Bin: " + bin + " Dec: " + dec;
-
-            if ((Connection) this.getServletContext().getAttribute("databaseConnection") == null) {
-                try {
-                    Class.forName("org.apache.derby.jdbc.ClientDriver");
-                } catch (ClassNotFoundException e) {
-                    System.err.println("Can't connect to database");
-                }
-
-                try {
-                    String url = this.getServletContext().getInitParameter("url");
-                    String username = this.getServletContext().getInitParameter("username");
-                    String password = this.getServletContext().getInitParameter("password");
-
-                    connection = DriverManager.getConnection(url, username, password);
-                } catch (SQLException sqle) {
-                    connection = null;
-                    System.err.println("Can't connect to database!");
-                }
-
-                this.getServletContext().setAttribute("databaseConnection", connection);
-            } else {
-                connection = (Connection) this.getServletContext().getAttribute("databaseConnection");
-            }
-
-            try {
-                Statement statement = connection.createStatement();
-                ResultSet rs = statement.executeQuery("SELECT * FROM WebConversions");
-
-                if (!rs.next()) {
-                    Cookie cookie = new Cookie("firstConversion", result);
-                    response.addCookie(cookie);
-                }
-
-                statement.executeUpdate("INSERT INTO WebConversions (binary_value, decimal_value) VALUES('"
-                        + bin + "', '" + dec + "')");
-            } catch (SQLException e) {
-                response.sendError(HttpServletResponse.SC_BAD_REQUEST, e.getMessage());
-            }
-
+        String result = "Bin: " + bin + " Dec: " + dec;
             try (PrintWriter out = response.getWriter()) {
 
                 out.println("<!DOCTYPE html>");
@@ -171,5 +96,17 @@ public class Bin2DecServlet extends HttpServlet {
     @Override
     public String getServletInfo() {
         return "Servlet responsible for bin2dec conversion.";
+    }
+
+    /**
+     * Method that sends binary value to be converted in Conversions Service 
+     * and gets the result of conversion.
+     * @param bin - binary value to be converted
+     * @return - result of conversion
+     */
+    private String bin2Dec(java.lang.String bin) {
+        servicesbin2dec2bin.conversionsservice.Conversions_Service service = new servicesbin2dec2bin.conversionsservice.Conversions_Service();
+        servicesbin2dec2bin.conversionsservice.Conversions port = service.getConversionsPort();
+        return port.bin2Dec(bin);
     }
 }
